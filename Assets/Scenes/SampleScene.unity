@@ -141,6 +141,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   apiKey: YourApiToken
+  initialLoadingCount: 20
+  prefab: {fileID: 1134795382875038, guid: b02d9dc3318b147b996e23aea2b06cf4, type: 2}
 --- !u!4 &147178496
 Transform:
   m_ObjectHideFlags: 0
