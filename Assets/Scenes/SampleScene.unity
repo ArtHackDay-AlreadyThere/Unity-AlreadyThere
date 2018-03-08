@@ -142,7 +142,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   apiKeyFileName: apikey.txt
-  initialLoadingCount: 20
+  initialLoadingCount: 50
   OnRecieve:
     m_PersistentCalls:
       m_Calls:
@@ -185,7 +185,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxBlockNum: 100
-  material: {fileID: 2100000, guid: 1da13807570484a408ac271f0b05aa59, type: 2}
+  shapeMaterial: {fileID: 2100000, guid: 1da13807570484a408ac271f0b05aa59, type: 2}
+  lineMaterial: {fileID: 2100000, guid: 16bb545d09f33d040a3621a0c17b3660, type: 2}
+  stiffness: 0.05
+  damping: 0.95
+  massRange: {x: 1, y: 5}
+  springLength: 1.2
 --- !u!1 &282840810
 GameObject:
   m_ObjectHideFlags: 0

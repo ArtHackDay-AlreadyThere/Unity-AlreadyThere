@@ -1,4 +1,4 @@
-﻿Shader "Custom/DrawShape"
+﻿Shader "Custom/Draw Shape"
 {
 	Properties
 	{
