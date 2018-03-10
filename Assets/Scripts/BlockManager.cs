@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class BlockManager : MonoBehaviour {
@@ -389,4 +390,31 @@ public class BlockManager : MonoBehaviour {
     {
         ReleaseBuffer();
     }
+
+    void PrintBlocks(int startIndex, int count) {
+        string print = "";
+        for (int i = startIndex; i < startIndex + count; i++) {
+            foreach (var transaction in blockShapeList[i].block.Transactions) {
+                if (transaction.From.Length > 0 && transaction.To.Length > 0) {
+                    print += transaction.From.Substring(2) + transaction.To.Substring(2);
+                }
+            }
+        }
+
+        if (print.Length == 0) {
+            return;
+        }
+
+        print = print.Substring(0, 512);
+
+        string filename = Path.GetTempFileName();
+        
+        StreamWriter writer = new System.IO.StreamWriter(filename, false);
+        writer.Write(print);
+
+        writer.Close();
+
+        System.Diagnostics.Process.Start(@"C:\Program Files (x86)\TeraPad\TeraPad.exe", @"/p " + filename);
+    }
+
 }
