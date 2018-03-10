@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using UnityEngine.Events;
+using PrefsGUI;
 
 public class Etherscan : MonoBehaviour {
 	[System.Serializable]
@@ -47,7 +48,8 @@ public class Etherscan : MonoBehaviour {
     /// <summary>
     /// 起動時に読み込む数
     /// </summary>
-    public int initialLoadingCount = 20;
+    //public int initialLoadingCount = 20;
+    public PrefsInt initialLoadingCount = new PrefsInt("initialLoadingCount", 20);
 
     public BlockDataEvent OnRecieve;
 
@@ -68,7 +70,7 @@ public class Etherscan : MonoBehaviour {
             apiKey = "YourApiToken";
         }
 
-        apiKey = "YourApiToken";    // test
+        //apiKey = "YourApiToken";    // test
 
         UnityWebRequest request = UnityWebRequest.Get("https://api.etherscan.io/api?module=proxy&action=eth_blockNumber&apikey=" + apiKey);
 		yield return request.SendWebRequest();
@@ -78,8 +80,10 @@ public class Etherscan : MonoBehaviour {
 		var currentBlockNumber = blockNumberReturn.result;
 		ulong currentBlockNumberUInt64 = System.Convert.ToUInt64(currentBlockNumber.Substring(2), 16);
 
+        ulong iniCount = (ulong)initialLoadingCount.Get();
+
         // 起動時の読み込み処理
-		for (ulong blockNumber = currentBlockNumberUInt64 - (ulong)initialLoadingCount + 1; blockNumber <= currentBlockNumberUInt64; blockNumber++) {
+        for (ulong blockNumber = currentBlockNumberUInt64 - iniCount + 1; blockNumber <= currentBlockNumberUInt64; blockNumber++) {
 			request = UnityWebRequest.Get("https://api.etherscan.io/api?module=proxy&action=eth_getBlockByNumber&apikey=" + apiKey + "&boolean=true&tag=0x" + blockNumber.ToString("X"));
 			yield return request.SendWebRequest();
 
@@ -163,4 +167,8 @@ public class Etherscan : MonoBehaviour {
         }
     }
 
+    public void DebugMenu()
+    {
+        initialLoadingCount.OnGUI();
+    }
 }

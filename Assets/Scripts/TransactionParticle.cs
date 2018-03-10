@@ -27,6 +27,10 @@ public class TransactionParticle : GPUParticleBase<TransactionParticleData> {
     // パーティクルの質量の範囲
     public Vector2 massRange = new Vector2(0.5f, 1);
 
+    //public float fadeTime = 5;
+
+    public BlockManager blockManager;
+
     protected ComputeBuffer shapeBuffer;    // 親図形のComputeBuffer
     protected int shapeCount = 0;
 
@@ -76,8 +80,8 @@ public class TransactionParticle : GPUParticleBase<TransactionParticleData> {
     {
         particlePoolCountBuffer.SetData(particleCounts);
         ComputeBuffer.CopyCount(particlePoolBuffer, particlePoolCountBuffer, 0);
-        particlePoolCountBuffer.GetData(particleCounts);
-        Debug.Log("EmitParticle Pool Num " + particleCounts[0]);
+        //particlePoolCountBuffer.GetData(particleCounts);
+        //Debug.Log("EmitParticle Pool Num " + particleCounts[0]);
 
         emitBuffer.SetData(emitList);
         cs.SetInt("_EmitIndex", emitIndex);
@@ -91,7 +95,7 @@ public class TransactionParticle : GPUParticleBase<TransactionParticleData> {
 
         //int threadGroupNumX = emitNum / THREAD_NUM_X;
         int threadGroupNumX = Mathf.CeilToInt(emitNum / (float)THREAD_NUM_X);
-        Debug.Log("threadGroupNumX " + threadGroupNumX + " particleCounts " + particleCounts[0] + " emitIndex " + emitIndex);
+        //Debug.Log("threadGroupNumX " + threadGroupNumX + " particleCounts " + particleCounts[0] + " emitIndex " + emitIndex);
 
         cs.Dispatch(emitKernel, threadGroupNumX, 1, 1);   // emitNumの数だけ発生
 
@@ -105,6 +109,7 @@ public class TransactionParticle : GPUParticleBase<TransactionParticleData> {
         cs.SetFloat("_Time", Time.time);
 
         cs.SetFloat("_DT", Time.deltaTime);
+        cs.SetFloat("_FadeTime", blockManager.fadeTime);
 
         cs.SetVector("_MassRange", massRange);
 

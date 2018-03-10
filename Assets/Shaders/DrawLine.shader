@@ -10,11 +10,13 @@
 
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" }
+		//Tags { "RenderType"="Opaque" }
+		Tags{ "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
 		LOD 100
 
 		ZWrite Off
-		Blend One One
+		//Blend One One
+		Blend SrcAlpha One
 
 		Pass
 		{
@@ -30,20 +32,8 @@
 			#include "Libs/Noise.cginc"
 			#include "Libs/Transform.cginc"
 			#include "Libs/Color.cginc"
-			
-			// 図形描画用データ
-			struct ShapeDrawData
-			{
-				float3 position;	// 座標
-				int vertexCount;    // 頂点数
-				float number;		// 番号
-				int seq;            // シーケンス
-				int blurCount;      // 残像数
-				float size;         // サイズ
-				float hashFloat;	// ハッシュ
-				uint id;			// 自分のID(起動時からの連番)
-				float4 color;		// 色
-			};
+			#include "Assets/ComputeShaders/ShapeDrawData.cginc"
+
 
 			// 頂点シェーダからの出力
 			struct VSOut {
@@ -84,8 +74,8 @@
 				//output.pos = mul(output.pos, billboardMatrix);
 				output.pos = mul(UNITY_MATRIX_VP, output.pos);
 
-				//output.col = _ShapeBuffer[id].col;
-				output.col = float4(HSVtoRGB(float3(_ShapeBuffer[id].number * _ColNumberPow + _Time.y * _ColSpeed, _HSVSat, _HSVVal)), 1);
+				output.col = _ShapeBuffer[id].color;
+				//output.col = float4(HSVtoRGB(float3(_ShapeBuffer[id].number * _ColNumberPow + _Time.y * _ColSpeed, _HSVSat, _HSVVal)), 1);
 				//output.vertexCount = _ShapeBuffer[id].vertexCount;  // 頂点数
 				//output.number = _ShapeBuffer[id].number;			// 番号
 				//output.blurCount = _ShapeBuffer[id].blurCount;      // 残像数

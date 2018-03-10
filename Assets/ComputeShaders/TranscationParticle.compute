@@ -7,6 +7,7 @@
 
 #include "Assets/Shaders/Libs/Noise.cginc"
 #include "Assets/Shaders/Libs/Utils2D.cginc"
+#include "Assets/ComputeShaders/ShapeDrawData.cginc"
 
 // パーティクルのデータ
  struct ParticleData
@@ -19,20 +20,6 @@
 	 uint parentID;			// 親図形のID
 	 float4 color;			// 色
 };
-
- // 図形描画用データ
- struct ShapeDrawData
- {
-	 float3 position;	// 座標
-	 int vertexCount;    // 頂点数
-	 float number;		// 番号
-	 int seq;            // シーケンス
-	 int blurCount;      // 残像数
-	 float size;         // サイズ
-	 float hashFloat;	// ハッシュ
-	 uint id;			// 自分のID(起動時からの連番)
-	 float4 color;		// 色
- };
 
 // 乱数生成
 inline float rnd(float2 p){
@@ -69,6 +56,8 @@ float _Val;
 int _EmitIndex;
 int _ShapeCount;
 float2 _MassRange;
+
+float _FadeTime;
 
 [numthreads(THREAD_NUM_X, 1, 1)]
 void Init (uint3 id : SV_DispatchThreadID)
@@ -118,6 +107,13 @@ void Update (uint3 id : SV_DispatchThreadID)
 
 			float size = (abs(snoise(float2(hash, _Time * 0.2))) * 0.9 + 0.1) * _ShapeBuffer[parentIndex].size;
 			float mass = lerp(_MassRange.x, _MassRange.y, saturate(hash3));
+			float power = 0.125;
+
+			if (_ShapeBuffer[parentIndex].seq == 1) {
+				float d = saturate(_ShapeBuffer[parentIndex].fadeDuration / _FadeTime);
+				size += d * 10;  // 消える時の時間
+				power = 0.0025;
+			}
 
 			//float3 offset = snoise3D(float3(hash1 * _Time *0.1, (float)no * 0.01 + _Time * 0.1, hash2 - _Time *0.1)) * _ShapeBuffer[parentIndex].size;
 			float3 offset = float3(
@@ -126,7 +122,7 @@ void Update (uint3 id : SV_DispatchThreadID)
 				snoise(float2(hash2, _Time * 0.25))
 				) * size;
 
-			float3 force = ((_ShapeBuffer[parentIndex].position + offset) - _Particles[no].position) * 0.125 / mass;
+			float3 force = ((_ShapeBuffer[parentIndex].position + offset) - _Particles[no].position) * power / mass;
 			_Particles[no].velocity += force;
 			_Particles[no].velocity *= 0.98;
 			_Particles[no].position += _Particles[no].velocity * _DT;

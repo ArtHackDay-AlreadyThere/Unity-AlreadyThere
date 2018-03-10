@@ -3,11 +3,15 @@
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
+		_Intensity("Intensity", Float) = 1.1
 	}
 	SubShader
 	{
+		Tags{ "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
+
 		ZWrite Off
-		Blend One One
+		//Blend One One
+		Blend SrcAlpha One
 
 		Pass
 		{
@@ -20,6 +24,7 @@
 			#include "UnityCG.cginc"
 
 			#pragma shader_feature GPUPARTICLE_CULLING_ON
+
 			// パーティクルのデータ
 			struct ParticleData
 			{
@@ -46,6 +51,7 @@
 			float4 _MainTex_ST;
 			
 			float2 _SizeRange;
+			float _Intensity;
 
 			StructuredBuffer<uint> _ParticleActiveList;
 			StructuredBuffer<uint> _InViewsList;
@@ -65,7 +71,7 @@
 				o.pos = float4(_Particles[index].position, 1);
 				//o.pos = float4(1, 1, 1, 1);
 				o.uv = float2(0,0);
-				o.col = _Particles[index].color;
+				o.col = _Particles[index].color * _Intensity;
 				//o.col = float4(1,1,1,1);	// test
 				o.scale = _Particles[index].isActive ? _Particles[index].scale : 0;
 				//o.scale = _Particles[index].isActive ? 0.1 : 0;	// test
