@@ -1,0 +1,146 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel Init
+#pragma kernel Emit
+#pragma kernel Update
+
+#define THREAD_NUM_X 32
+
+#include "Assets/Shaders/Libs/Noise.cginc"
+#include "Assets/Shaders/Libs/Utils2D.cginc"
+
+// パーティクルのデータ
+ struct ParticleData
+ {
+	 bool isActive;			// 有効無効
+	 int seq;				// シーケンス
+	 float3 position;		// 座標
+	 float3 velocity;		// 加速度
+	 float scale;			// 大きさ
+	 uint parentID;			// 親図形のID
+	 float4 color;			// 色
+};
+
+ // 図形描画用データ
+ struct ShapeDrawData
+ {
+	 float3 position;	// 座標
+	 int vertexCount;    // 頂点数
+	 float number;		// 番号
+	 int seq;            // シーケンス
+	 int blurCount;      // 残像数
+	 float size;         // サイズ
+	 float hashFloat;	// ハッシュ
+	 uint id;			// 自分のID(起動時からの連番)
+	 float4 color;		// 色
+ };
+
+// 乱数生成
+inline float rnd(float2 p){
+    return frac(sin(dot(p ,float2(12.9898, 78.233))) * 43758.5453);
+}
+
+inline float3 rnd3(float2 p){
+	return 2.0 * (float3(rnd(p * 1), rnd(p * 2), rnd(p * 3)) - 0.5);
+}
+
+float3 hsv_to_rgb(float3 HSV)
+{
+	float4 k = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+	float3 p = abs(frac(HSV.xxx + k.xyz) * 6.0 - k.www);
+	return HSV.z * lerp(k.xxx, clamp(p - k.xxx, 0.0, 1.0), HSV.y);
+}
+
+RWStructuredBuffer<ParticleData> _Particles;
+AppendStructuredBuffer<uint> _DeadList;
+ConsumeStructuredBuffer<uint> _ParticlePool;
+AppendStructuredBuffer<uint> _ActiveList;
+StructuredBuffer<ParticleData> _EmitBuffer;
+StructuredBuffer<int> _PoolCount;
+StructuredBuffer<ShapeDrawData> _ShapeBuffer;
+
+float _VelocityMax;
+float _DT;
+float _Time;
+float _ScaleMin;
+float _ScaleMax;
+float _Sai;
+float _Val;
+
+int _EmitIndex;
+int _ShapeCount;
+float2 _MassRange;
+
+[numthreads(THREAD_NUM_X, 1, 1)]
+void Init (uint3 id : SV_DispatchThreadID)
+{
+	uint no = id.x;
+
+	_Particles[no].isActive = false;
+	_DeadList.Append(no);
+}
+
+[numthreads(THREAD_NUM_X, 1, 1)]
+void Emit (uint3 id : SV_DispatchThreadID)
+{
+	uint idx = id.x;
+	//if ((idx >= _PoolCount[0])||(idx >= _EmitIndex)) return;	// 残り数越えてたら抜ける
+	if (idx >= _EmitIndex) return;
+
+	uint no = _ParticlePool.Consume();
+
+	_Particles[no] = _EmitBuffer[idx];
+	_Particles[no].isActive = true;
+}
+
+[numthreads(THREAD_NUM_X, 1, 1)]
+void Update (uint3 id : SV_DispatchThreadID)
+{
+	uint no = id.x;
+
+	if(_Particles[no].isActive) {
+		// 親図形が生きてたら生存続行
+		int parentIndex = -1;
+		int parentID = _Particles[no].parentID;
+		[loop]
+		for (int i = 0; i < _ShapeCount; i++) {
+			if (_ShapeBuffer[i].id == parentID) {
+				parentIndex = i;
+				break;
+			}
+		}
+
+		if (parentIndex >= 0) {
+			// 座標行進
+			float hash = hash11(_ShapeBuffer[parentIndex].hashFloat) * 344.0;
+			float hash1 = hash11(_ShapeBuffer[parentIndex].hashFloat + (float)no * 0.1) * 837.0;
+			float hash2 = hash11(_ShapeBuffer[parentIndex].hashFloat + 294.0 + (float)no * 0.1) * 3543.0;
+			float hash3 = hash11(_ShapeBuffer[parentIndex].hashFloat + 582.5 + (float)no * 0.1);
+
+			float size = (abs(snoise(float2(hash, _Time * 0.2))) * 0.9 + 0.1) * _ShapeBuffer[parentIndex].size;
+			float mass = lerp(_MassRange.x, _MassRange.y, saturate(hash3));
+
+			//float3 offset = snoise3D(float3(hash1 * _Time *0.1, (float)no * 0.01 + _Time * 0.1, hash2 - _Time *0.1)) * _ShapeBuffer[parentIndex].size;
+			float3 offset = float3(
+				snoise(float2(hash1, _Time * 0.25)),
+				0,
+				snoise(float2(hash2, _Time * 0.25))
+				) * size;
+
+			float3 force = ((_ShapeBuffer[parentIndex].position + offset) - _Particles[no].position) * 0.125 / mass;
+			_Particles[no].velocity += force;
+			_Particles[no].velocity *= 0.98;
+			_Particles[no].position += _Particles[no].velocity * _DT;
+			//_Particles[no].position = _ShapeBuffer[parentIndex].position + offset;
+			_Particles[no].color = _ShapeBuffer[parentIndex].color;
+			_ActiveList.Append(no);
+		}
+		else {
+			// 親がいない場合は削除
+			// TODO: 消える演出作る
+			_Particles[no].isActive = false;
+			_DeadList.Append(no);
+		}
+
+	}
+
+}

@@ -123,6 +123,8 @@ public class Etherscan : MonoBehaviour {
             transactions.Add(transaction);
         }
 
+        Debug.Log("transactions " + transactions.Count);
+
         block.Transactions = transactions;
         OnRecieve.Invoke(block);
 

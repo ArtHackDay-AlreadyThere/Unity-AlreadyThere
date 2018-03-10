@@ -10,13 +10,15 @@ public class BlockManager : MonoBehaviour {
     {
         public Vector3 position;    // 座標
         public int vertexCount;     // 頂点数
-        public float number;         // 番号
+        public float number;        // 番号
         public int seq;             // シーケンス
         public int blurCount;       // 残像数
         public float size;          // サイズ
         public float hashFloat;     // ハッシュ
+        public uint id;             // ID(最初からの連番)
+        public Color color;         // 色
     }
-    
+
     /// <summary>
     /// ブロックと図形データをまとめたクラス
     /// </summary>
@@ -48,6 +50,15 @@ public class BlockManager : MonoBehaviour {
 
     // バネの長さ
     public float springLength = 1;
+
+    [Range(0,1)]
+    public float _HSVSat;
+    [Range(0, 1)]
+    public float _HSVVal;
+    public float _ColSpeed;
+    public float _ColNumberPow;
+
+    public TransactionParticle particle;
     #endregion
 
     #region private member
@@ -59,6 +70,8 @@ public class BlockManager : MonoBehaviour {
     int shapeDataIndex = 0;
 
     ulong oldNumber = 0;
+
+    static uint idNumber = 0;   // 起動時からの連番
     #endregion
 
 
@@ -124,7 +137,8 @@ public class BlockManager : MonoBehaviour {
             //pos.y = pos3d.z + Mathf.Sin(rad) * 1f;
         }
 
-       
+        data.shape.id = idNumber++;
+
         data.shape.position.x = pos.x;
         data.shape.position.y = 0;
         data.shape.position.z = pos.y;
@@ -144,6 +158,7 @@ public class BlockManager : MonoBehaviour {
         for(int i = 0; i < block.Transactions.Count; i++)
         {
             size += block.Transactions[i].Value;
+            particle.EmitParticle(data.shape.id, data.shape.position, (float)block.Transactions[i].Value);
         }
         data.shape.size = Mathf.Clamp((float)(size / block.Transactions.Count), 0.25f, 0.5f);
         //data.shape.size = 0.1f; //test
@@ -152,6 +167,12 @@ public class BlockManager : MonoBehaviour {
 
         blockShapeList.Add(data);
         Debug.Log("blockShapeList.Count " + blockShapeList.Count);
+
+        if(blockShapeList.Count >= maxBlockNum)
+        {
+            // TODO: 最大数越えたら先頭を印刷して削除
+            blockShapeList.RemoveAt(0);
+        }
     }
 
     void Initialize()
@@ -224,11 +245,17 @@ public class BlockManager : MonoBehaviour {
             //blockShapeList[i].shape.position.z = pos.y;
         }
 
+        float time = Time.time;
+
         // 座標行進
         float screenRange = Camera.main.orthographicSize;
         for (int i = 0; i < count; i++)
         {
             blockShapeList[i].shape.position += blockShapeList[i].velocity * dt;
+
+            //blockShapeList[i].shape.color = float4(HSVtoRGB(float3(_ShapeBuffer[id].number * _ColNumberPow + _Time.y * _ColSpeed, _HSVSat, _HSVVal)), 1);
+            blockShapeList[i].shape.color = Color.HSVToRGB((blockShapeList[i].shape.number * _ColNumberPow + time * _ColSpeed) % 1f, _HSVSat, _HSVVal);
+            //blockShapeList[i].shape.color = Color.red;
 
             if (blockShapeList[i].shape.position.x < -screenRange)
             {
@@ -280,7 +307,10 @@ public class BlockManager : MonoBehaviour {
 	void Update () {
         UpdateShapeData();
         UpdateDrawData();
-
+        if (particle != null)
+        {
+            particle.SetShapeBuffer(shapeDataBuffer, shapeDataIndex);
+        }
     }
 
     /// <summary>

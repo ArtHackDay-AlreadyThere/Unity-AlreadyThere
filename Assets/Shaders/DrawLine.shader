@@ -41,6 +41,8 @@
 				int blurCount;      // 残像数
 				float size;         // サイズ
 				float hashFloat;	// ハッシュ
+				uint id;			// 自分のID(起動時からの連番)
+				float4 color;		// 色
 			};
 
 			// 頂点シェーダからの出力

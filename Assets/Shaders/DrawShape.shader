@@ -41,6 +41,8 @@
 				int blurCount;      // 残像数
 				float size;         // サイズ
 				float hashFloat;	// ハッシュ
+				uint id;			// 自分のID(起動時からの連番)
+				float4 color;		// 色
 			};
 
 			// 頂点シェーダからの出力
@@ -73,8 +75,8 @@
 			{
 				VSOut output;
 				output.pos = float4(_ShapeBuffer[id].position, 1);
-				//output.col = _ShapeBuffer[id].col;
-				output.col = float4(HSVtoRGB(float3(_ShapeBuffer[id].number * _ColNumberPow + _Time.y * _ColSpeed, _HSVSat, _HSVVal)), 1);
+				output.col = _ShapeBuffer[id].color;
+				//output.col = float4(HSVtoRGB(float3(_ShapeBuffer[id].number * _ColNumberPow + _Time.y * _ColSpeed, _HSVSat, _HSVVal)), 1);
 				output.vertexCount = _ShapeBuffer[id].vertexCount;  // 頂点数
 				output.number = _ShapeBuffer[id].number;			// 番号
 				output.blurCount = _ShapeBuffer[id].blurCount;      // 残像数
