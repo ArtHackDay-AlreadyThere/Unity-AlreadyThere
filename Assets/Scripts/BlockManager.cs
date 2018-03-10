@@ -362,6 +362,8 @@ public class BlockManager : MonoBehaviour {
         writer.Write(print);
 
         writer.Close();
+
+        System.Diagnostics.Process.Start(@"C:\Program Files (x86)\TeraPad\TeraPad.exe", @"/p " + filename);
     }
 
 }
