@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using PrefsGUI;
 
 public class BlockManager : MonoBehaviour {
 
@@ -37,15 +38,22 @@ public class BlockManager : MonoBehaviour {
     #endregion
 
     #region public member
-    public int maxBlockNum = 100;   // ブロック最大数
-    public int minBlockNum = 10;    // 最低ブロック数(印刷するときも最低限残す量)
+    //public int maxBlockNum = 100;   // ブロック最大数
+    //public int minBlockNum = 10;    // 最低ブロック数(印刷するときも最低限残す量)
 
-    public float printInterval = 300;  // 印刷する間隔(秒)
+    //public float printInterval = 300;  // 印刷する間隔(秒)
 
-    public int printNum = 100;      // 一度に印刷するブロック数
+    //public int printNum = 100;      // 一度に印刷するブロック数
+
+    //public float fadeTime = 5;      // フェードアウトする時間
+
+    public PrefsFloat fadeTime = new PrefsFloat("fadeTime", 5);
+    public PrefsInt maxBlockNum = new PrefsInt("maxBlockNum", 200);
+    public PrefsInt minBlockNum = new PrefsInt("minBlockNum", 10);
+
+    public PrefsFloat printInterval = new PrefsFloat("printInterval", 300);
+    public PrefsInt printNum = new PrefsInt("printNum", 100);
     
-    public float fadeTime = 5;      // フェードアウトする時間
-
     public Material shapeMaterial;  // 図形描画用マテリアル
     public Material lineMaterial;   // ライン描画用マテリアル
     
@@ -84,6 +92,7 @@ public class BlockManager : MonoBehaviour {
     float printDuration = 0;
 
     static uint idNumber = 0;   // 起動時からの連番
+
     #endregion
 
 
@@ -319,10 +328,10 @@ public class BlockManager : MonoBehaviour {
             int printCount = Mathf.Min(printNum, Mathf.Max(blockShapeList.Count - minBlockNum, 0));
 
             // 印刷
-            //PrintBlocks(0, printCount);
+            PrintBlocks(0, printCount);
 
             // 削除
-            for(int i = 0; i < printCount; i++)
+            for (int i = 0; i < printCount; i++)
             {
                 blockShapeList[i].shape.seq = 1;    // 消えるフェーズへ
                 blockShapeList[i].shape.fadeDuration = fadeTime + i * 0.5f;
@@ -419,6 +428,18 @@ public class BlockManager : MonoBehaviour {
         writer.Close();
 
         System.Diagnostics.Process.Start(@"C:\Program Files (x86)\TeraPad\TeraPad.exe", @"/p " + filename);
+    }
+
+
+    public void DebugMenu()
+    {
+        fadeTime.OnGUI();
+
+        maxBlockNum.OnGUI();
+        minBlockNum.OnGUI();
+
+        printInterval.OnGUI();
+        printNum.OnGUI();
     }
 
 }
