@@ -27,6 +27,8 @@ public class TransactionParticle : GPUParticleBase<TransactionParticleData> {
     // パーティクルの質量の範囲
     public Vector2 massRange = new Vector2(0.5f, 1);
 
+    public float fadeTime = 5;
+
     protected ComputeBuffer shapeBuffer;    // 親図形のComputeBuffer
     protected int shapeCount = 0;
 
@@ -105,6 +107,7 @@ public class TransactionParticle : GPUParticleBase<TransactionParticleData> {
         cs.SetFloat("_Time", Time.time);
 
         cs.SetFloat("_DT", Time.deltaTime);
+        cs.SetFloat("_FadeTime", fadeTime);
 
         cs.SetVector("_MassRange", massRange);
 

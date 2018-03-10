@@ -76,8 +76,6 @@
 				if (_ShapeBuffer[id].seq == 1) {
 					float d = 1.0 - saturate(_ShapeBuffer[id].fadeDuration / _FadeTime);
 					output.size += d * 2;  // 消える時の時間
-					//output.col.a *= d;
-
 				}
 				//output.rotation = _ShapeBuffer[id].rotation;		// 角度
 				output.hashFloat = _ShapeBuffer[id].hashFloat;

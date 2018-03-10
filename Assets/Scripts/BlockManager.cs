@@ -287,22 +287,25 @@ public class BlockManager : MonoBehaviour {
 
             }
 
-            if (blockShapeList[i].shape.position.x < -screenRange)
+            // はみ出しチェック
+            float scr = screenRange - blockShapeList[i].shape.size;
+
+            if (blockShapeList[i].shape.position.x < -scr)
             {
-                blockShapeList[i].shape.position.x = -screenRange;
+                blockShapeList[i].shape.position.x = -scr;
             }
-            if (blockShapeList[i].shape.position.x > screenRange)
+            if (blockShapeList[i].shape.position.x > scr)
             {
-                blockShapeList[i].shape.position.x = screenRange;
+                blockShapeList[i].shape.position.x = scr;
             }
 
-            if (blockShapeList[i].shape.position.z < -screenRange)
+            if (blockShapeList[i].shape.position.z < -scr)
             {
-                blockShapeList[i].shape.position.z = -screenRange;
+                blockShapeList[i].shape.position.z = -scr;
             }
-            if (blockShapeList[i].shape.position.z > screenRange)
+            if (blockShapeList[i].shape.position.z > scr)
             {
-                blockShapeList[i].shape.position.z = screenRange;
+                blockShapeList[i].shape.position.z = scr;
             }
 
 
@@ -313,18 +316,19 @@ public class BlockManager : MonoBehaviour {
 
         if(printDuration <= 0f)
         {
-            // TODO: 印刷
+            int printCount = Mathf.Min(printNum, Mathf.Max(blockShapeList.Count - minBlockNum, 0));
+
+            // 印刷
+            //PrintBlocks(0, printCount);
 
             // 削除
-            int printCount = Mathf.Min(printNum, Mathf.Max(blockShapeList.Count - minBlockNum, 0));
             for(int i = 0; i < printCount; i++)
             {
                 blockShapeList[i].shape.seq = 1;    // 消えるフェーズへ
-                blockShapeList[i].shape.fadeDuration = fadeTime + i * 0.25f;
-                //blockShapeList[i].shape.fadeDuration = fadeTime;
+                blockShapeList[i].shape.fadeDuration = fadeTime + i * 0.5f;
             }
 
-            printDuration = printInterval;
+            printDuration = Mathf.Max(printInterval, fadeTime + printCount * 0.5f);
         }
     }
 

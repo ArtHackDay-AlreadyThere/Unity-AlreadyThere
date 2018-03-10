@@ -68,7 +68,7 @@ public class Etherscan : MonoBehaviour {
             apiKey = "YourApiToken";
         }
 
-        apiKey = "YourApiToken";    // test
+        //apiKey = "YourApiToken";    // test
 
         UnityWebRequest request = UnityWebRequest.Get("https://api.etherscan.io/api?module=proxy&action=eth_blockNumber&apikey=" + apiKey);
 		yield return request.SendWebRequest();
