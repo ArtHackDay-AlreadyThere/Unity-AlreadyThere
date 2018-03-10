@@ -144,7 +144,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   apiKeyFileName: apikey.txt
-  initialLoadingCount: 50
+  initialLoadingCount: 20
   OnRecieve:
     m_PersistentCalls:
       m_Calls:
@@ -187,11 +187,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxBlockNum: 200
+  minBlockNum: 10
+  printInterval: 10
+  printNum: 5
+  fadeTime: 2
   shapeMaterial: {fileID: 2100000, guid: 1da13807570484a408ac271f0b05aa59, type: 2}
   lineMaterial: {fileID: 2100000, guid: 16bb545d09f33d040a3621a0c17b3660, type: 2}
   stiffness: 0.05
   damping: 0.95
-  massRange: {x: 1, y: 5}
+  massRange: {x: 2, y: 2}
   springLength: 1.2
   _HSVSat: 0.8
   _HSVVal: 1
@@ -212,7 +216,7 @@ MonoBehaviour:
   particleMax: 10000
   emitMax: 512
   cs: {fileID: 7200000, guid: a6e73dd3cbbae274686b06a10185172f, type: 3}
-  particleSizeRange: {x: 0.0125, y: 0.025}
+  particleSizeRange: {x: 0.0125, y: 0.05}
   particlePositionRandomSize: 0.1
   massRange: {x: 1, y: 4}
 --- !u!114 &147178499
@@ -289,7 +293,7 @@ Camera:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_RenderingPath: -1
+  m_RenderingPath: 1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3

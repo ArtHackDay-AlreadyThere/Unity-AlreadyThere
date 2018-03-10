@@ -76,8 +76,8 @@ public class TransactionParticle : GPUParticleBase<TransactionParticleData> {
     {
         particlePoolCountBuffer.SetData(particleCounts);
         ComputeBuffer.CopyCount(particlePoolBuffer, particlePoolCountBuffer, 0);
-        particlePoolCountBuffer.GetData(particleCounts);
-        Debug.Log("EmitParticle Pool Num " + particleCounts[0]);
+        //particlePoolCountBuffer.GetData(particleCounts);
+        //Debug.Log("EmitParticle Pool Num " + particleCounts[0]);
 
         emitBuffer.SetData(emitList);
         cs.SetInt("_EmitIndex", emitIndex);
@@ -91,7 +91,7 @@ public class TransactionParticle : GPUParticleBase<TransactionParticleData> {
 
         //int threadGroupNumX = emitNum / THREAD_NUM_X;
         int threadGroupNumX = Mathf.CeilToInt(emitNum / (float)THREAD_NUM_X);
-        Debug.Log("threadGroupNumX " + threadGroupNumX + " particleCounts " + particleCounts[0] + " emitIndex " + emitIndex);
+        //Debug.Log("threadGroupNumX " + threadGroupNumX + " particleCounts " + particleCounts[0] + " emitIndex " + emitIndex);
 
         cs.Dispatch(emitKernel, threadGroupNumX, 1, 1);   // emitNumの数だけ発生
 

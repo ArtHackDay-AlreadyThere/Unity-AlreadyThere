@@ -10,11 +10,15 @@
 
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" }
-		LOD 100
+		//Tags { "RenderType"="Opaque" }
+		Tags{ "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
+
+		//LOD 100
 
 		ZWrite Off
-		Blend One One
+		//Blend One One
+		//Blend OneMinusDstColor One
+		Blend SrcAlpha One
 
 		Pass
 		{
@@ -30,20 +34,7 @@
 			#include "Libs/Noise.cginc"
 			#include "Libs/Transform.cginc"
 			#include "Libs/Color.cginc"
-			
-			// 図形描画用データ
-			struct ShapeDrawData
-			{
-				float3 position;	// 座標
-				int vertexCount;    // 頂点数
-				float number;		// 番号
-				int seq;            // シーケンス
-				int blurCount;      // 残像数
-				float size;         // サイズ
-				float hashFloat;	// ハッシュ
-				uint id;			// 自分のID(起動時からの連番)
-				float4 color;		// 色
-			};
+			#include "Assets/ComputeShaders/ShapeDrawData.cginc"
 
 			// 頂点シェーダからの出力
 			struct VSOut {
@@ -70,6 +61,7 @@
 			float _HSVVal;
 			float _ColSpeed;
 			float _ColNumberPow;
+			float _FadeTime;
 
 			VSOut vert (uint id : SV_VertexID)
 			{
@@ -81,6 +73,12 @@
 				output.number = _ShapeBuffer[id].number;			// 番号
 				output.blurCount = _ShapeBuffer[id].blurCount;      // 残像数
 				output.size = _ShapeBuffer[id].size;				// サイズ
+				if (_ShapeBuffer[id].seq == 1) {
+					float d = 1.0 - saturate(_ShapeBuffer[id].fadeDuration / _FadeTime);
+					output.size += d * 2;  // 消える時の時間
+					//output.col.a *= d;
+
+				}
 				//output.rotation = _ShapeBuffer[id].rotation;		// 角度
 				output.hashFloat = _ShapeBuffer[id].hashFloat;
 				return output;
@@ -142,10 +140,12 @@
 				}
 			}
 
-			fixed4 frag (v2f i) : SV_Target
+			float4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
-				fixed4 col = i.col;
+				float4 col = i.col;
+				//fixed4 col = fixed4(1,1,1,0);
+
 				return col;
 			}
 			ENDCG

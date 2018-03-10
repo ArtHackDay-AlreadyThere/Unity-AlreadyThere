@@ -7,6 +7,7 @@
 
 #include "Assets/Shaders/Libs/Noise.cginc"
 #include "Assets/Shaders/Libs/Utils2D.cginc"
+#include "Assets/ComputeShaders/ShapeDrawData.cginc"
 
 // パーティクルのデータ
  struct ParticleData
@@ -19,20 +20,6 @@
 	 uint parentID;			// 親図形のID
 	 float4 color;			// 色
 };
-
- // 図形描画用データ
- struct ShapeDrawData
- {
-	 float3 position;	// 座標
-	 int vertexCount;    // 頂点数
-	 float number;		// 番号
-	 int seq;            // シーケンス
-	 int blurCount;      // 残像数
-	 float size;         // サイズ
-	 float hashFloat;	// ハッシュ
-	 uint id;			// 自分のID(起動時からの連番)
-	 float4 color;		// 色
- };
 
 // 乱数生成
 inline float rnd(float2 p){

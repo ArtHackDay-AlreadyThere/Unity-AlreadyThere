@@ -17,6 +17,8 @@ public class BlockManager : MonoBehaviour {
         public float hashFloat;     // ハッシュ
         public uint id;             // ID(最初からの連番)
         public Color color;         // 色
+        public float fadeDuration;  // 消える時の時間
+
     }
 
     /// <summary>
@@ -35,10 +37,17 @@ public class BlockManager : MonoBehaviour {
 
     #region public member
     public int maxBlockNum = 100;   // ブロック最大数
+    public int minBlockNum = 10;    // 最低ブロック数(印刷するときも最低限残す量)
+
+    public float printInterval = 300;  // 印刷する間隔(秒)
+
+    public int printNum = 100;      // 一度に印刷するブロック数
+    
+    public float fadeTime = 5;      // フェードアウトする時間
 
     public Material shapeMaterial;  // 図形描画用マテリアル
     public Material lineMaterial;   // ライン描画用マテリアル
-
+    
     // バネの強度
     public float stiffness = 0.1f;
 
@@ -70,6 +79,8 @@ public class BlockManager : MonoBehaviour {
     int shapeDataIndex = 0;
 
     ulong oldNumber = 0;
+
+    float printDuration = 0;
 
     static uint idNumber = 0;   // 起動時からの連番
     #endregion
@@ -181,6 +192,8 @@ public class BlockManager : MonoBehaviour {
         shapeDataBuffer = new ComputeBuffer(maxBlockNum, System.Runtime.InteropServices.Marshal.SizeOf(typeof(ShapeDrawData)));
         blockShapeList = new List<BlockShapeData>(maxBlockNum);
 
+        printDuration = printInterval;
+
         //for (int i = 0; i < maxBlockNum; i++)
         //{
         //    BlockShapeData data = new BlockShapeData();
@@ -249,13 +262,29 @@ public class BlockManager : MonoBehaviour {
 
         // 座標行進
         float screenRange = Camera.main.orthographicSize;
-        for (int i = 0; i < count; i++)
+        for (int i = (count - 1); i >= 0; i--)
         {
             blockShapeList[i].shape.position += blockShapeList[i].velocity * dt;
 
             //blockShapeList[i].shape.color = float4(HSVtoRGB(float3(_ShapeBuffer[id].number * _ColNumberPow + _Time.y * _ColSpeed, _HSVSat, _HSVVal)), 1);
             blockShapeList[i].shape.color = Color.HSVToRGB((blockShapeList[i].shape.number * _ColNumberPow + time * _ColSpeed) % 1f, _HSVSat, _HSVVal);
             //blockShapeList[i].shape.color = Color.red;
+
+            // 消滅チェック
+            if (blockShapeList[i].shape.seq > 0)
+            {
+                if (blockShapeList[i].shape.fadeDuration <= 0f)
+                {
+                    blockShapeList.RemoveAt(i);
+                    continue;
+                }
+
+                blockShapeList[i].shape.fadeDuration -= dt;
+                float d = Mathf.Clamp01(blockShapeList[i].shape.fadeDuration / fadeTime);
+                blockShapeList[i].shape.color.a = d;
+                //Debug.Log("[" + i + "] " + d + " " + blockShapeList[i].shape.fadeDuration);
+
+            }
 
             if (blockShapeList[i].shape.position.x < -screenRange)
             {
@@ -274,6 +303,27 @@ public class BlockManager : MonoBehaviour {
             {
                 blockShapeList[i].shape.position.z = screenRange;
             }
+
+
+        }
+
+        // 印刷チェック
+        printDuration -= dt;
+
+        if(printDuration <= 0f)
+        {
+            // TODO: 印刷
+
+            // 削除
+            int printCount = Mathf.Min(printNum, Mathf.Max(blockShapeList.Count - minBlockNum, 0));
+            for(int i = 0; i < printCount; i++)
+            {
+                blockShapeList[i].shape.seq = 1;    // 消えるフェーズへ
+                blockShapeList[i].shape.fadeDuration = fadeTime + i * 0.25f;
+                //blockShapeList[i].shape.fadeDuration = fadeTime;
+            }
+
+            printDuration = printInterval;
         }
     }
 
@@ -321,6 +371,7 @@ public class BlockManager : MonoBehaviour {
         // 図形の描画
         shapeMaterial.SetBuffer("_ShapeBuffer", shapeDataBuffer);
         shapeMaterial.SetInt("_ShapeBufferCount", shapeDataIndex);
+        shapeMaterial.SetFloat("_FadeTime", fadeTime);
 
         shapeMaterial.SetPass(0);
 
