@@ -142,8 +142,10 @@ public class WindowControl : MonoBehaviour {
             SetPosition(x, y, width, height);
         }
 
-        // Drag Start
-        if (Input.GetMouseButtonDown(0))
+        bool isPressShift = (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+
+        // Drag Start (Shift押しながら)
+        if (Input.GetMouseButtonDown(0) && isPressShift)
         {
             Vector2 pos = GetWindowMousePosition();
             oldX = (int)pos.x;
@@ -151,7 +153,7 @@ public class WindowControl : MonoBehaviour {
         }
 
         // Drag
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) && isPressShift)
         {
             Vector2 pos = GetWindowMousePosition();
             int nowX = (int)pos.x;

@@ -389,6 +389,12 @@ public class BlockManager : MonoBehaviour {
         {
             particle.SetShapeBuffer(shapeDataBuffer, shapeDataIndex);
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Debug.Log("Exit");
+            Application.Quit();
+        }
     }
 
     /// <summary>

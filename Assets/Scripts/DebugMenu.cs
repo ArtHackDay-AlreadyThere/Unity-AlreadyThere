@@ -42,7 +42,8 @@ public class DebugMenu : MonoBehaviour {
     {
         if (isDebugMenu)
         {
-            _windowRect =
+            _windowRect.x = Screen.width / 2 - _windowRect.width / 2;
+            _windowRect.y = Screen.height / 2 - _windowRect.height / 2;
                 GUILayout.Window(
                     GetHashCode(), _windowRect, (id) =>
                     {
