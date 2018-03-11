@@ -222,6 +222,9 @@ MonoBehaviour:
   damping: 0.95
   massRange: {x: 1, y: 1}
   springLength: 1.2
+  noiseSpeed: 0.01
+  noisePower: 2
+  noiseScale: 2.5
   _HSVSat: 0.8
   _HSVVal: 1
   _ColSpeed: 0.1

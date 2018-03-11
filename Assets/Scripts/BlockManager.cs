@@ -66,6 +66,10 @@ public class BlockManager : MonoBehaviour {
     // バネの長さ
     public float springLength = 1;
 
+    public float noiseSpeed = 0.1f;
+    public float noisePower = 1;
+    public float noiseScale = 0.1f;
+
     [Range(0,1)]
     public float _HSVSat;
     [Range(0, 1)]
@@ -242,17 +246,29 @@ public class BlockManager : MonoBehaviour {
                 //targetPos.x = Mathf.Cos(rad) * radius;
                 //targetPos.y = 0;
                 //targetPos.z = Mathf.Sin(rad) * radius;
-                targetPos.x = 0;
+                Vector3 pos = blockShapeList[i].shape.position;
+                float tx = Mathf.PerlinNoise(pos.x * noiseScale + Time.time * noiseSpeed, pos.y * noiseScale - Time.time * noiseSpeed) * 2f - 1f;
+                float ty = Mathf.PerlinNoise(pos.y * noiseScale + Time.time * noiseSpeed + 10000, pos.x * noiseScale - Time.time * noiseSpeed + 30000) * 2f - 1f;
+                targetPos.x = pos.x + tx * noisePower;
+                targetPos.z = pos.z + ty * noisePower;
+
+                //targetPos.x = 0;
                 targetPos.y = 0;
-                targetPos.z = 0;
+                //targetPos.z = 0;
             }
             else
             {
                 Vector3 pos = blockShapeList[i - 1].shape.position;
+                float tx = Mathf.PerlinNoise(pos.x * noiseScale + Time.time * noiseSpeed, pos.y * noiseScale - Time.time * noiseSpeed) * 2f - 1f;
+                float ty = Mathf.PerlinNoise(pos.y * noiseScale + Time.time * noiseSpeed + 10000, pos.x * noiseScale - Time.time * noiseSpeed + 30000) * 2f - 1f;
+
                 float scale = (blockShapeList[i].shape.size + blockShapeList[i - 1].shape.size) * 0.5f;
                 targetPos = pos + (blockShapeList[i].shape.position - pos).normalized * scale * springLength;   // 一定の長さを保つ位置を求める
+                targetPos.x += ty * 0.5f;
+                targetPos.z += ty * 0.5f;
+
             }
-            
+
             // フックの法則
             Vector3 force = (targetPos - blockShapeList[i].shape.position) * stiffness / blockShapeList[i].mass;           // フックの法則 f = -kx
             //velocity = (blockShapeList[i].velocity + force) * damping;    // 速度計算
