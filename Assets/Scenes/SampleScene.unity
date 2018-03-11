@@ -215,6 +215,12 @@ MonoBehaviour:
   printNum:
     key: printNum
     defaultValue: 100
+  printEnable:
+    key: printEnable
+    defaultValue: 1
+  printHashSize:
+    key: printHashSize
+    defaultValue: 512
   shapeMaterial: {fileID: 2100000, guid: 1da13807570484a408ac271f0b05aa59, type: 2}
   lineMaterial: {fileID: 2100000, guid: 16bb545d09f33d040a3621a0c17b3660, type: 2}
   specialTo: 0x4bcee95fa8dcc14dc62cf5507c323bfa4354a2bf
@@ -663,8 +669,6 @@ GameObject:
   m_Component:
   - component: {fileID: 974639222}
   - component: {fileID: 974639221}
-  - component: {fileID: 974639220}
-  - component: {fileID: 974639219}
   m_Layer: 9
   m_Name: Camera
   m_TagString: Untagged
@@ -672,20 +676,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &974639219
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 974639218}
-  m_Enabled: 1
---- !u!124 &974639220
-Behaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 974639218}
-  m_Enabled: 1
 --- !u!20 &974639221
 Camera:
   m_ObjectHideFlags: 0

@@ -45,7 +45,10 @@ public class BlockManager : MonoBehaviour {
 
     public PrefsFloat printInterval = new PrefsFloat("printInterval", 300);
     public PrefsInt printNum = new PrefsInt("printNum", 100);
-    
+
+    public PrefsBool printEnable = new PrefsBool("printEnable", true);
+    public PrefsInt printHashSize = new PrefsInt("printHashSize", 512);
+
     public Material shapeMaterial;  // 図形描画用マテリアル
     public Material lineMaterial;   // ライン描画用マテリアル
 
@@ -441,6 +444,9 @@ public class BlockManager : MonoBehaviour {
     }
 
     void PrintBlocks(int startIndex, int count) {
+        if (!printEnable)
+            return;
+
         string print = "";
         for (int i = startIndex; i < startIndex + count; i++)
         {
@@ -458,7 +464,7 @@ public class BlockManager : MonoBehaviour {
             return;
         }
 
-        print = print.Substring(0, 512);
+        print = print.Substring(0, printHashSize);
 
 
         string filename = Path.GetTempFileName();
@@ -488,6 +494,9 @@ public class BlockManager : MonoBehaviour {
 
         printInterval.OnGUI();
         printNum.OnGUI();
+
+        printEnable.OnGUI();
+        printHashSize.OnGUI();
     }
 
 }
