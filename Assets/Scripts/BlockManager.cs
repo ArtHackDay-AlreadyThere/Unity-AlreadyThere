@@ -359,10 +359,20 @@ public class BlockManager : MonoBehaviour {
 
     void RemoveBlock()
     {
-        int printCount = Mathf.Min(printNum, Mathf.Min(blockShapeList.Count - minBlockNum, minBlockNum));
+        int printCount = printNum;
 
-        // 印刷
-        PrintBlocks(0, printCount);
+        if((blockShapeList.Count - printCount) < minBlockNum)
+        {
+            printCount = Mathf.Max(blockShapeList.Count - minBlockNum, 0);
+        }
+
+        Debug.Log("printCount " + printCount);
+
+        if (printCount > 0)
+        {
+            // 印刷
+            PrintBlocks(0, printCount);
+        }
 
         // 削除
         for (int i = 0; i < printCount; i++)
@@ -497,7 +507,10 @@ public class BlockManager : MonoBehaviour {
         maxBlockNum.OnGUI();
         minBlockNum.OnGUI();
 
-        printInterval.OnGUI();
+        if (printInterval.OnGUI())
+        {
+            printDuration = printInterval;
+        }
         printNum.OnGUI();
 
         printEnable.OnGUI();
