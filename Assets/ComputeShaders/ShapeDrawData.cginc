@@ -14,5 +14,6 @@ struct ShapeDrawData
 	uint id;			// 自分のID(起動時からの連番)
 	float4 color;		// 色
 	float fadeDuration;  // 消える時の時間
+	bool isSpecial;      // 特別な送金先か？
 };
 #endif

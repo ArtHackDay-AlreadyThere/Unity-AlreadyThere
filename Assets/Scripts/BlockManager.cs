@@ -20,6 +20,7 @@ public class BlockManager : MonoBehaviour {
         public uint id;             // ID(最初からの連番)
         public Color color;         // 色
         public float fadeDuration;  // 消える時の時間
+        public bool isSpecial;      // 特別な送金先か？
 
     }
 
@@ -38,15 +39,6 @@ public class BlockManager : MonoBehaviour {
     #endregion
 
     #region public member
-    //public int maxBlockNum = 100;   // ブロック最大数
-    //public int minBlockNum = 10;    // 最低ブロック数(印刷するときも最低限残す量)
-
-    //public float printInterval = 300;  // 印刷する間隔(秒)
-
-    //public int printNum = 100;      // 一度に印刷するブロック数
-
-    //public float fadeTime = 5;      // フェードアウトする時間
-
     public PrefsFloat fadeTime = new PrefsFloat("fadeTime", 5);
     public PrefsInt maxBlockNum = new PrefsInt("maxBlockNum", 200);
     public PrefsInt minBlockNum = new PrefsInt("minBlockNum", 10);
@@ -56,7 +48,12 @@ public class BlockManager : MonoBehaviour {
     
     public Material shapeMaterial;  // 図形描画用マテリアル
     public Material lineMaterial;   // ライン描画用マテリアル
-    
+
+    /// <summary>
+    /// 特別な送金先
+    /// </summary>
+    public string specialTo = "";
+
     // バネの強度
     public float stiffness = 0.1f;
 
@@ -175,14 +172,26 @@ public class BlockManager : MonoBehaviour {
         data.velocity = Vector3.zero;
         data.mass = Random.Range(massRange.x, massRange.y);
 
+        bool isSpecial = false;
         double size = 0;
         for(int i = 0; i < block.Transactions.Count; i++)
         {
             size += block.Transactions[i].Value;
             particle.EmitParticle(data.shape.id, data.shape.position, (float)block.Transactions[i].Value);
+            if(block.Transactions[i].To == specialTo)
+            {
+                isSpecial = true;
+            }
         }
+        //isSpecial = true;   // test
         data.shape.size = Mathf.Clamp((float)(size / block.Transactions.Count), 0.25f, 0.5f);
-        //data.shape.size = 0.1f; //test
+        data.shape.isSpecial = isSpecial;
+        if (isSpecial)
+        {
+            data.shape.size += 0.5f;   // 大きくする
+            data.shape.vertexCount = 16;    // 16芒星
+            data.shape.blurCount = 6;
+        }
 
         Debug.Log("hashTop " + hashTop + " Number " + data.shape.number + " pos " + data.shape.position + " vertexCount " + data.shape.vertexCount + " blurCount " + data.shape.blurCount + " size " + data.shape.size + " hashFloat "+ data.shape.hashFloat + " TopNum " + topNum + " BottomNum " + bottomNum);
 
@@ -191,8 +200,8 @@ public class BlockManager : MonoBehaviour {
 
         if(blockShapeList.Count >= maxBlockNum)
         {
-            // TODO: 最大数越えたら先頭を印刷して削除
-            blockShapeList.RemoveAt(0);
+            // 最大数越えたら印刷して削除
+            RemoveBlock();
         }
     }
 
@@ -276,9 +285,9 @@ public class BlockManager : MonoBehaviour {
         {
             blockShapeList[i].shape.position += blockShapeList[i].velocity * dt;
 
-            //blockShapeList[i].shape.color = float4(HSVtoRGB(float3(_ShapeBuffer[id].number * _ColNumberPow + _Time.y * _ColSpeed, _HSVSat, _HSVVal)), 1);
-            blockShapeList[i].shape.color = Color.HSVToRGB((blockShapeList[i].shape.number * _ColNumberPow + time * _ColSpeed) % 1f, _HSVSat, _HSVVal);
-            //blockShapeList[i].shape.color = Color.red;
+            // 色変更
+            float colorSpeed = blockShapeList[i].shape.isSpecial ? 10 : 1;
+            blockShapeList[i].shape.color = Color.HSVToRGB((blockShapeList[i].shape.number * _ColNumberPow + time * _ColSpeed * colorSpeed) % 1f, _HSVSat, _HSVVal);
 
             // 消滅チェック
             if (blockShapeList[i].shape.seq > 0)
@@ -325,20 +334,25 @@ public class BlockManager : MonoBehaviour {
 
         if(printDuration <= 0f)
         {
-            int printCount = Mathf.Min(printNum, Mathf.Max(blockShapeList.Count - minBlockNum, 0));
-
-            // 印刷
-            PrintBlocks(0, printCount);
-
-            // 削除
-            for (int i = 0; i < printCount; i++)
-            {
-                blockShapeList[i].shape.seq = 1;    // 消えるフェーズへ
-                blockShapeList[i].shape.fadeDuration = fadeTime + i * 0.5f;
-            }
-
-            printDuration = Mathf.Max(printInterval, fadeTime + printCount * 0.5f);
+            RemoveBlock();
         }
+    }
+
+    void RemoveBlock()
+    {
+        int printCount = Mathf.Min(printNum, Mathf.Max(blockShapeList.Count - minBlockNum, 0));
+
+        // 印刷
+        PrintBlocks(0, printCount);
+
+        // 削除
+        for (int i = 0; i < printCount; i++)
+        {
+            blockShapeList[i].shape.seq = 1;    // 消えるフェーズへ
+            blockShapeList[i].shape.fadeDuration = fadeTime + i * 0.5f;
+        }
+
+        printDuration = Mathf.Max(printInterval, fadeTime + printCount * 0.5f);
     }
 
     void UpdateDrawData()
@@ -406,28 +420,40 @@ public class BlockManager : MonoBehaviour {
 
     void PrintBlocks(int startIndex, int count) {
         string print = "";
-        for (int i = startIndex; i < startIndex + count; i++) {
-            foreach (var transaction in blockShapeList[i].block.Transactions) {
-                if (transaction.From.Length > 0 && transaction.To.Length > 0) {
+        for (int i = startIndex; i < startIndex + count; i++)
+        {
+            foreach (var transaction in blockShapeList[i].block.Transactions)
+            {
+                if (transaction.From.Length > 0 && transaction.To.Length > 0)
+                {
                     print += transaction.From.Substring(2) + transaction.To.Substring(2);
                 }
             }
         }
 
-        if (print.Length == 0) {
+        if (print.Length == 0)
+        {
             return;
         }
 
         print = print.Substring(0, 512);
 
+
         string filename = Path.GetTempFileName();
-        
+
         StreamWriter writer = new System.IO.StreamWriter(filename, false);
         writer.Write(print);
 
         writer.Close();
 
-        System.Diagnostics.Process.Start(@"C:\Program Files (x86)\TeraPad\TeraPad.exe", @"/p " + filename);
+        try
+        {
+
+            System.Diagnostics.Process.Start(@"C:\Program Files (x86)\TeraPad\TeraPad.exe", @"/p " + filename);
+        }catch(System.Exception e)
+        {
+            Debug.LogError(e.Message);
+        }
     }
 
 

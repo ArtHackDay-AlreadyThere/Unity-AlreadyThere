@@ -100,30 +100,25 @@
 
 				float rad = PI2 / input[0].vertexCount;
 				int count = input[0].vertexCount + 1;
+				bool isSpecial = input[0].vertexCount == 16 ? true : false;
 
 				//float3 angle = snoise_grad(float3(input[0].number, _Time.y, 0));
 				
 				float hash = hash11(input[0].hashFloat) * 344.0;
 				float hash1 = hash11(input[0].hashFloat + 1392.0) * 192.0;
 				float hash2 = hash11(input[0].hashFloat + 294.0) * 3543.0;
-				//float hash = input[0].hashFloat * 0.05;
-				//float hash1 = hash11(input[0].hashFloat + 100392.0) * 34294.0;
-				//float hash2 = hash11(input[0].hashFloat + 34294.0) * 235483543.0;
 
 				for (int j = 0; j < input[0].blurCount; j++) {
 					
 					float3 angle = snoise3D(float3(hash1, j * 0.01 + _Time.y * 0.1, hash2)) * PI2 * 0.5;
 					//float size = snoise(float2((float)input[0].number, j * 0.01 + _Time.y * 0.1)) * input[0].size;
 					float size = (abs(snoise(float2(hash, j * 0.02 + _Time.y * 0.2))) * 0.9 + 0.1)* input[0].size;
-
 					for (int i = 0; i < count; i++) {
-						float3 pos2 = float3(cos(rad * i) * size, 0, sin(rad * i) * size);
+						float size2 = (isSpecial && (i % 2 == 0)) ? size * 0.75 : size;
 
-						//pos2 = rotateWithQuaternion(pos2, input[0].rotation);
-						//pos2 = rotateAngleAxis(pos2, axis, _Time.y);
-						//pos2 = rotateX(pos2, angle.x);
+						float3 pos2 = float3(cos(rad * i) * size2, 0, sin(rad * i) * size2);
+
 						pos2 = rotateY(pos2, angle.y);
-						//pos2 = rotateZ(pos2, angle.z);
 
 						//output.pos = pos + mul(float4(pos2, 1), billboardMatrix);
 						output.pos = pos + float4(pos2, 0);
