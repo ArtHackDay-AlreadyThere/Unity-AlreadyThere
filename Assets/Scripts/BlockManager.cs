@@ -359,7 +359,7 @@ public class BlockManager : MonoBehaviour {
 
     void RemoveBlock()
     {
-        int printCount = Mathf.Min(printNum, Mathf.Max(blockShapeList.Count - minBlockNum, 0));
+        int printCount = Mathf.Min(printNum, Mathf.Min(blockShapeList.Count - minBlockNum, minBlockNum));
 
         // 印刷
         PrintBlocks(0, printCount);
@@ -402,6 +402,11 @@ public class BlockManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            RemoveBlock();
+        }
+
         UpdateShapeData();
         UpdateDrawData();
         if (particle != null)
