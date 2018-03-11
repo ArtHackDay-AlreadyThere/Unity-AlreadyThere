@@ -10,6 +10,8 @@ public class WindowControl : MonoBehaviour {
     public int height = 1080;
 
     public bool isSavePosition = true;
+
+    public Camera camera;
     #endregion
 
     #region private
