@@ -77,13 +77,12 @@ public class Etherscan : MonoBehaviour {
 
 		var blockNumberReturn = JsonUtility.FromJson<BlockNumberReturn>(request.downloadHandler.text);
 
-		var currentBlockNumber = blockNumberReturn.result;
-		ulong currentBlockNumberUInt64 = System.Convert.ToUInt64(currentBlockNumber.Substring(2), 16);
+		ulong currentBlockNumber = System.Convert.ToUInt64(blockNumberReturn.result.Substring(2), 16);
 
         ulong iniCount = (ulong)initialLoadingCount.Get();
 
         // 起動時の読み込み処理
-        for (ulong blockNumber = currentBlockNumberUInt64 - iniCount + 1; blockNumber <= currentBlockNumberUInt64; blockNumber++) {
+        for (ulong blockNumber = currentBlockNumber - iniCount + 1; blockNumber <= currentBlockNumber; blockNumber++) {
 			request = UnityWebRequest.Get("https://api.etherscan.io/api?module=proxy&action=eth_getBlockByNumber&apikey=" + apiKey + "&boolean=true&tag=0x" + blockNumber.ToString("X"));
 			yield return request.SendWebRequest();
 
@@ -96,12 +95,16 @@ public class Etherscan : MonoBehaviour {
 			yield return request.SendWebRequest();
 
 			blockNumberReturn = JsonUtility.FromJson<BlockNumberReturn>(request.downloadHandler.text);
-			if (!currentBlockNumber.Equals(blockNumberReturn.result)) {
-				request = UnityWebRequest.Get("https://api.etherscan.io/api?module=proxy&action=eth_getBlockByNumber&apikey=" + apiKey + "&boolean=true&tag=" + blockNumberReturn.result);
-				yield return request.SendWebRequest();
 
-				var getBlockByNumberReturn = JsonUtility.FromJson<GetBlockByNumberReturn>(request.downloadHandler.text);
-				GenerateBlock(getBlockByNumberReturn.result);
+			var latestBlockNumber = System.Convert.ToUInt64(blockNumberReturn.result.Substring(2), 16);
+			if (currentBlockNumber < latestBlockNumber) {
+				for (; currentBlockNumber <= latestBlockNumber; currentBlockNumber++) {
+					request = UnityWebRequest.Get("https://api.etherscan.io/api?module=proxy&action=eth_getBlockByNumber&apikey=" + apiKey + "&boolean=true&tag=0x" + currentBlockNumber.ToString("X"));
+					yield return request.SendWebRequest();
+
+					var getBlockByNumberReturn = JsonUtility.FromJson<GetBlockByNumberReturn>(request.downloadHandler.text);
+					GenerateBlock(getBlockByNumberReturn.result);
+				}
 			}
 
 			yield return new WaitForSeconds(5.0f);
