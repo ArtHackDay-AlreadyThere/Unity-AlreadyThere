@@ -7,7 +7,7 @@ public class DebugMenu : MonoBehaviour {
 
     public BlockManager blockManager;
     public Etherscan etherscan;
-    public Canvas canvas;
+    public GameObject calibrationPattern;
 
     bool isDebugMenu = false;
 
@@ -34,7 +34,7 @@ public class DebugMenu : MonoBehaviour {
     void UpdateCanvas(bool isCalib)
     {
         isCalibrationpattern = isCalib;
-        canvas.gameObject.SetActive(isCalib);
+        calibrationPattern.SetActive(isCalib);
     }
 
     Rect _windowRect = new Rect(10, 10, 500, 500);

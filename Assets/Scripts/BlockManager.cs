@@ -154,9 +154,9 @@ public class BlockManager : MonoBehaviour {
             Vector3 norm = diff.normalized;
             //pos.x = pos3d.x + norm.x * 0.1f;
             //pos.y = pos3d.z + norm.z * 0.1f;
-            Vector2 randPos = Random.insideUnitCircle * 0.1f;
-            pos.x = pos3d.x + norm.x * 0.1f + randPos.x;
-            pos.y = pos3d.z + norm.y * 0.1f + randPos.y;
+            Vector2 randPos = Random.insideUnitCircle * 0.01f;
+            pos.x = pos3d.x + norm.x * springLength * 0.125f + randPos.x;
+            pos.y = pos3d.z + norm.y * springLength * 0.125f + randPos.y;
             //float rad = Mathf.Atan2(norm.y, norm.x) * Mathf.PI * 0.5f;
             //pos.x = pos3d.x + Mathf.Cos(rad) * 1f;
             //pos.y = pos3d.z + Mathf.Sin(rad) * 1f;
@@ -249,15 +249,16 @@ public class BlockManager : MonoBehaviour {
                 //targetPos.x = Mathf.Cos(rad) * radius;
                 //targetPos.y = 0;
                 //targetPos.z = Mathf.Sin(rad) * radius;
-                Vector3 pos = blockShapeList[i].shape.position;
-                float tx = Mathf.PerlinNoise(pos.x * noiseScale + Time.time * noiseSpeed, pos.y * noiseScale - Time.time * noiseSpeed) * 2f - 1f;
-                float ty = Mathf.PerlinNoise(pos.y * noiseScale + Time.time * noiseSpeed + 10000, pos.x * noiseScale - Time.time * noiseSpeed + 30000) * 2f - 1f;
-                targetPos.x = pos.x + tx * noisePower;
-                targetPos.z = pos.z + ty * noisePower;
 
-                //targetPos.x = 0;
+                //Vector3 pos = blockShapeList[i].shape.position;
+                //float tx = Mathf.PerlinNoise(pos.x * noiseScale + Time.time * noiseSpeed, pos.y * noiseScale - Time.time * noiseSpeed) * 2f - 1f;
+                //float ty = Mathf.PerlinNoise(pos.y * noiseScale + Time.time * noiseSpeed + 10000, pos.x * noiseScale - Time.time * noiseSpeed + 30000) * 2f - 1f;
+                //targetPos.x = pos.x + tx * noisePower;
+                //targetPos.z = pos.z + ty * noisePower;
+
+                targetPos.x = 0;
                 targetPos.y = 0;
-                //targetPos.z = 0;
+                targetPos.z = 0;
             }
             else
             {
