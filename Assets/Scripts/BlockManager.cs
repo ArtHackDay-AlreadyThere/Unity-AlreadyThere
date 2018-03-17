@@ -151,7 +151,13 @@ public class BlockManager : MonoBehaviour {
             // 3個め以降は一つ前から発生
             Vector3 pos3d = blockShapeList[blockShapeList.Count - 1].shape.position;
             Vector3 diff = pos3d - blockShapeList[blockShapeList.Count - 2].shape.position;
-            Vector3 norm = diff.normalized;
+            float len = diff.magnitude;
+            Vector3 norm = Vector3.zero;
+            if (len > 0)
+            {
+                norm = diff.normalized;
+            }
+                
             //pos.x = pos3d.x + norm.x * 0.1f;
             //pos.y = pos3d.z + norm.z * 0.1f;
             Vector2 randPos = Random.insideUnitCircle * 0.01f;
@@ -274,7 +280,8 @@ public class BlockManager : MonoBehaviour {
             }
 
             // フックの法則
-            Vector3 force = (targetPos - blockShapeList[i].shape.position) * stiffness / blockShapeList[i].mass;           // フックの法則 f = -kx
+            //Vector3 force = (targetPos - blockShapeList[i].shape.position) * stiffness / blockShapeList[i].mass;           // フックの法則 f = -kx
+            Vector3 force = (targetPos - blockShapeList[i].shape.position) * stiffness;
             //velocity = (blockShapeList[i].velocity + force) * damping;    // 速度計算
 
             // 他のブロックとぶつからないようにする
@@ -483,15 +490,15 @@ public class BlockManager : MonoBehaviour {
         print = print.Substring(0, printHashSize);
 
 
-        string filename = Path.GetTempFileName();
-
-        StreamWriter writer = new System.IO.StreamWriter(filename, false);
-        writer.Write(print);
-
-        writer.Close();
-
+        StreamWriter writer = null;
         try
         {
+            string filename = Path.GetTempFileName();
+
+            writer = new System.IO.StreamWriter(filename, false);
+            writer.Write(print);
+
+            writer.Close();
 
             System.Diagnostics.Process.Start(@"C:\Program Files (x86)\TeraPad\TeraPad.exe", @"/p " + filename);
         }catch(System.Exception e)
